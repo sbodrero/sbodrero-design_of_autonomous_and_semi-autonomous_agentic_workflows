@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI System Design Report — Warehouse Intelligence Assistant</title>
+<style>
+  /* ── Base ─────────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 12pt;
+    line-height: 1.7;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 780px;
+    margin: 40px auto;
+    padding: 0 30px 60px;
+  }
+
+  /* ── Title page ───────────────────────────────────────────────────── */
+  .title-block {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #333;
+  }
+  .title-block h1 { font-size: 20pt; margin-bottom: 8px; }
+  .title-block .subtitle { font-size: 14pt; color: #444; margin-bottom: 20px; }
+  .title-block .meta { font-size: 10.5pt; color: #555; line-height: 2; }
+
+  /* ── Table of Contents ────────────────────────────────────────────── */
+  .toc {
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px 28px;
+    margin-bottom: 40px;
+  }
+  .toc h2 { font-size: 13pt; margin-bottom: 12px; border-bottom: 1px solid #ccc; padding-bottom: 6px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 4px; }
+  .toc a { color: #2c5282; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* ── Section headings ─────────────────────────────────────────────── */
+  h2 {
+    font-size: 15pt;
+    margin-top: 44px;
+    margin-bottom: 12px;
+    border-bottom: 1.5px solid #555;
+    padding-bottom: 5px;
+  }
+  h3 { font-size: 12.5pt; margin-top: 24px; margin-bottom: 8px; color: #222; }
+
+  /* ── Body text ────────────────────────────────────────────────────── */
+  p { margin-bottom: 14px; text-align: justify; }
+  ul, ol { margin: 10px 0 14px 28px; }
+  li { margin-bottom: 6px; }
+
+  /* ── Tables ───────────────────────────────────────────────────────── */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0 20px;
+    font-size: 11pt;
+  }
+  th {
+    background: #2c5282;
+    color: #fff;
+    padding: 8px 12px;
+    text-align: left;
+  }
+  td { padding: 7px 12px; border-bottom: 1px solid #ddd; vertical-align: top; }
+  tr:nth-child(even) td { background: #f5f8ff; }
+
+  /* ── Code / architecture diagram ──────────────────────────────────── */
+  pre {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 9.5pt;
+    line-height: 1.5;
+    padding: 18px 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 16px 0 20px;
+    white-space: pre;
+  }
+
+  /* ── Callout boxes ─────────────────────────────────────────────────── */
+  .callout {
+    border-left: 4px solid #2c5282;
+    background: #ebf4ff;
+    padding: 12px 16px;
+    margin: 16px 0 20px;
+    border-radius: 0 4px 4px 0;
+    font-size: 11pt;
+  }
+  .callout.warning { border-color: #c05621; background: #fff5eb; }
+  .callout.ethical { border-color: #276749; background: #f0fff4; }
+
+  /* ── References ───────────────────────────────────────────────────── */
+  .references { margin-top: 40px; border-top: 1.5px solid #555; padding-top: 20px; }
+  .ref-entry {
+    margin-bottom: 14px;
+    padding-left: 36px;
+    text-indent: -36px;
+    font-size: 11pt;
+  }
+
+  /* ── Print ────────────────────────────────────────────────────────── */
+  @media print {
+    body { margin: 20mm; padding: 0; }
+    pre { font-size: 8.5pt; }
+    a { color: #1a1a1a; }
+    .toc a { color: #1a1a1a; }
+    h2 { page-break-after: avoid; }
+    pre, table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Title block ──────────────────────────────────────────────────── -->
+<div class="title-block">
+  <h1>Agentic AI System Design Report</h1>
+  <div class="subtitle">Warehouse Intelligence Assistant (WIA)</div>
+  <div class="meta">
+    <strong>Author:</strong> Sébastien Bodrero<br>
+    <strong>Programme:</strong> Woolf University / Udacity MSc in Artificial Intelligence<br>
+    <strong>Module:</strong> Agentic AI Systems (Module 6)<br>
+    <strong>Date:</strong> April 2026
+  </div>
+</div>
+
+<!-- ── Table of Contents ────────────────────────────────────────────── -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#s1">Overview</a></li>
+    <li><a href="#s2">System Architecture and Design</a></li>
+    <li><a href="#s3">Decision Logic and Behavior</a></li>
+    <li><a href="#s4">Safety, Reliability, and Transparency</a></li>
+    <li><a href="#s5">Observed Behavior and Limitations</a></li>
+    <li><a href="#s6">Ethical and Responsible Use Considerations</a></li>
+    <li><a href="#s7">Future Improvements</a></li>
+    <li><a href="#refs">References</a></li>
+  </ol>
+</div>
+
+<!-- ── Section 1 ────────────────────────────────────────────────────── -->
+<h2 id="s1">1. Overview</h2>
+
+<p>
+The <strong>Warehouse Intelligence Assistant (WIA)</strong> is a single-agent AI system that helps warehouse operations managers make real-time, safety-aware fleet coordination decisions through natural language interaction. Given a request such as <em>"Route AGV-3 to pick zone C — is the inventory sufficient and is the path clear?"</em>, the agent autonomously gathers context from simulated warehouse tools, reasons about safety constraints, and returns a concrete recommendation or escalates to a human supervisor when required.
+</p>
+
+<p>
+The agentic approach is motivated by the multi-step, context-dependent nature of warehouse coordination queries. A static rule engine cannot handle the open-ended combination of vehicle availability checks, inventory queries, path computation, and dynamic safety constraints that a single manager request may require. An LLM-driven reasoning loop — where the model iteratively decides which tool to call next, integrates results across calls, and adapts its strategy when unexpected conditions arise — is the appropriate architectural pattern for this class of task (Wang et al., 2024).
+</p>
+
+<p>
+The system is intentionally scoped for academic demonstration. All warehouse data is simulated via Python dictionaries; no live WMS API integration is required. The goal is to demonstrate the core agentic design pattern — tool-use reasoning, memory, safeguards, and ethical constraints — in a reproducible, portfolio-appropriate form.
+</p>
+
+<!-- ── Section 2 ────────────────────────────────────────────────────── -->
+<h2 id="s2">2. System Architecture and Design</h2>
+
+<h3>2.1 Component Overview</h3>
+
+<pre>
+┌─────────────────────────────────────────────────────────────────┐
+│                  Warehouse Intelligence Assistant                │
+│                                                                 │
+│  ┌───────────────┐    ┌──────────────────────────────────────┐  │
+│  │  AgentMemory  │◄───│            WarehouseAgent            │  │
+│  │               │    │                                      │  │
+│  │ • conversation│    │  • System prompt (persona + rules)   │  │
+│  │   history     │    │  • run(user_query) → reasoning loop  │  │
+│  │ • decision    │    │  • _dispatch_tool(name, args)        │  │
+│  │   log (deque) │    │  • _safety_check(tool, args)         │  │
+│  └───────────────┘    └──────────────┬───────────────────────┘  │
+│                                      │  tool_use / tool_result  │
+│                       ┌──────────────▼───────────────────────┐  │
+│                       │          WarehouseTools               │  │
+│                       │                                      │  │
+│                       │  check_inventory(zone_id)            │  │
+│                       │  get_agent_status(agent_id)          │  │
+│                       │  find_safe_path(start,end,blocked)   │  │
+│                       │  escalate_to_human(reason, urgency)  │  │
+│                       └──────────────────────────────────────┘  │
+│                                      │ HTTPS / JSON             │
+│                       ┌──────────────▼───────────────────────┐  │
+│                       │    Anthropic Claude API               │  │
+│                       │    (claude-haiku-4-5-20251001)        │  │
+│                       └──────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+</pre>
+
+<h3>2.2 Component Descriptions</h3>
+
+<table>
+  <tr><th>Component</th><th>Role</th><th>Key design choice</th></tr>
+  <tr>
+    <td><strong>WarehouseAgent</strong></td>
+    <td>Orchestrates the reasoning loop; builds system prompts; dispatches tool calls; enforces safeguards</td>
+    <td>ReAct-style loop (Yao et al., 2023): think → act → observe → repeat until end_turn or iteration cap</td>
+  </tr>
+  <tr>
+    <td><strong>AgentMemory</strong></td>
+    <td>Maintains the conversation message list for the current turn; keeps a rolling decision log (deque) across turns</td>
+    <td>Conversation history is reset per turn to limit context window growth; decision log persists across turns within a session</td>
+  </tr>
+  <tr>
+    <td><strong>WarehouseTools</strong></td>
+    <td>Provides four simulated tool implementations: inventory, fleet status, pathfinding, human escalation</td>
+    <td>All tools are stateless Python methods returning dicts; no side effects except the escalation log printout</td>
+  </tr>
+  <tr>
+    <td><strong>Claude API</strong></td>
+    <td>LLM backbone for all reasoning, tool-call selection, and natural language generation</td>
+    <td>Claude Haiku chosen for speed and cost efficiency in iterative testing; model can be swapped without code changes</td>
+  </tr>
+</table>
+
+<h3>2.3 Reasoning Loop</h3>
+
+<pre>
+User query
+    │
+    ▼
+[1] Build messages: system_prompt (persona + decision log) + conversation_history
+    │
+    ▼
+[2] Call Claude API with tool_schemas
+    │
+    ├─── stop_reason = "end_turn"
+    │         └─→ Extract text → return final answer
+    │
+    └─── stop_reason = "tool_use"
+              │
+              ▼
+          [3] Pre-dispatch safety check
+              │
+              ├── SAFETY VIOLATION detected
+              │       └─→ Inject safety_warning as tool_result
+              │           (model sees warning; decides to escalate)
+              │
+              └── SAFE
+                      └─→ Dispatch tool → get result
+                          Append tool_result to messages
+                          goto [2]  (iteration counter + 1)
+
+    If iterations ≥ MAX_TOOL_ITERATIONS:
+        → Auto-escalate → return abort message
+</pre>
+
+<h3>2.4 Memory Design</h3>
+
+<p>
+The agent uses two distinct memory structures. <strong>Conversation history</strong> is a standard list of Claude API message dicts (alternating user/assistant/tool_result) that is rebuilt from scratch at each user turn. This keeps the context window bounded and avoids the token cost of carrying stale multi-turn context. <strong>The decision log</strong> is a rolling <code>deque</code> (capped at 10 entries) of completed decisions that is injected as text into the system prompt at the start of each new turn. This gives the agent lightweight recall of recent actions — analogous to a shift-change handover note — without the expense of full conversation replay.
+</p>
+
+<p>
+This two-layer design is a deliberate tradeoff: it sacrifices perfect recall of earlier turns within a session in exchange for predictable token usage and simpler state management, which is appropriate for a demonstration system where session length is bounded.
+</p>
+
+<!-- ── Section 3 ────────────────────────────────────────────────────── -->
+<h2 id="s3">3. Decision Logic and Behavior</h2>
+
+<h3>3.1 How the agent decides which tools to call</h3>
+
+<p>
+The LLM backbone (Claude Haiku) selects tools based on its understanding of the user's query and the tool descriptions in the API schema. No explicit planning graph or hard-coded decision tree is used; tool selection is emergent from the model's language understanding. This allows the agent to handle novel phrasings and query combinations without requiring enumeration of all possible cases.
+</p>
+
+<p>
+In practice, a typical routing query follows this tool sequence: (1) <code>get_agent_status</code> to confirm the vehicle is idle and has sufficient battery, (2) <code>check_inventory</code> to verify the destination zone has the requested goods, (3) <code>find_safe_path</code> to compute the route. The agent may call tools in a different order or add extra calls if the first results reveal unexpected conditions (e.g., vehicle is busy → agent checks for alternative vehicles).
+</p>
+
+<h3>3.2 Response to different input situations</h3>
+
+<table>
+  <tr><th>Situation</th><th>Agent behavior</th></tr>
+  <tr>
+    <td>Normal routing request (vehicle idle, zone stocked, path clear)</td>
+    <td>Multi-tool call sequence; returns routing recommendation with path and inventory confirmation</td>
+  </tr>
+  <tr>
+    <td>Path naturally traverses a human safety zone</td>
+    <td>Safety pre-check injects warning; model receives it as tool result; calls <code>escalate_to_human</code> autonomously; informs manager that supervisor approval is required</td>
+  </tr>
+  <tr>
+    <td>Vehicle is charging or busy</td>
+    <td>Reports vehicle unavailability; may suggest alternative vehicles after checking fleet status</td>
+  </tr>
+  <tr>
+    <td>Destination zone has zero inventory</td>
+    <td>Reports empty zone; recommends against dispatching a vehicle for a pickup</td>
+  </tr>
+  <tr>
+    <td>Multiple simultaneous blockers (vehicle charging AND zone empty)</td>
+    <td>Reports both issues; ordering of which is prioritised first varies across runs (known limitation — see §5)</td>
+  </tr>
+  <tr>
+    <td>Unknown vehicle or zone ID</td>
+    <td>Tool returns error dict; agent surfaces the error in plain language and asks the manager to verify the identifier</td>
+  </tr>
+</table>
+
+<h3>3.3 System prompt and persona</h3>
+
+<p>
+The system prompt establishes the agent's identity, safety rules, and memory context. It explicitly lists the four safety invariants (avoid human safety zones without escalation; refuse to dispatch low-battery vehicles; note conflicts with busy vehicles; escalate when uncertain) as hard constraints. Embedding these rules in the system prompt rather than encoding them purely in Python ensures the LLM's natural language reasoning layer is aware of them, reducing the risk of the model finding creative workarounds that satisfy the letter of a code-level rule while violating its intent.
+</p>
+
+<!-- ── Section 4 ────────────────────────────────────────────────────── -->
+<h2 id="s4">4. Safety, Reliability, and Transparency</h2>
+
+<h3>4.1 Safeguards implemented</h3>
+
+<table>
+  <tr><th>Safeguard</th><th>Implementation</th><th>Purpose</th></tr>
+  <tr>
+    <td>Human safety zone check</td>
+    <td>Pre-dispatch Python function (<code>_safety_check</code>) runs BFS to detect if the natural path traverses any zone in <code>HUMAN_SAFETY_ZONES</code>; injects warning into tool result before the LLM-selected path is returned</td>
+    <td>Prevents routing recommendations through zones where human workers are present without supervisor sign-off</td>
+  </tr>
+  <tr>
+    <td>Iteration cap</td>
+    <td><code>MAX_TOOL_ITERATIONS = 6</code> enforced in the reasoning loop; auto-escalates and terminates if exceeded</td>
+    <td>Prevents runaway tool-call loops from consuming unbounded API tokens and clock time</td>
+  </tr>
+  <tr>
+    <td>Decision logging</td>
+    <td>Every completed turn is appended to <code>AgentMemory.decision_log</code> with timestamp, query summary, and outcome</td>
+    <td>Provides an auditable record of agent actions within a session, supporting operator review</td>
+  </tr>
+  <tr>
+    <td>Low-battery rule</td>
+    <td>Encoded in the system prompt; tool result for a charging vehicle includes battery percentage, which the LLM uses to apply the rule</td>
+    <td>Prevents vehicles with critically low battery from being dispatched, avoiding mid-task breakdowns</td>
+  </tr>
+  <tr>
+    <td>Escalation tool</td>
+    <td>Explicit tool with urgency levels ('low', 'medium', 'high', 'critical'); the model is instructed to call it proactively when uncertain</td>
+    <td>Human-in-the-loop mechanism for decisions that exceed the agent's confidence or authority scope</td>
+  </tr>
+</table>
+
+<div class="callout warning">
+<strong>Design principle — defence in depth:</strong> Safeguards are implemented at two layers: the Python <code>_safety_check</code> function (code-level, deterministic) and the system prompt rules (LLM-level, probabilistic). Neither layer alone is sufficient; the combination provides defence in depth against both code gaps and LLM reasoning failures.
+</div>
+
+<h3>4.2 Transparency mechanisms</h3>
+
+<p>
+The agent's reasoning is observable through two channels. First, the <strong>verbose logging</strong> mode (default: on) prints each tool call, its arguments, and its result to standard output as the reasoning loop executes. This allows a human observer to trace exactly how the agent arrived at its recommendation, step by step. Second, the <strong>decision log</strong> in <code>AgentMemory</code> records a summary of each completed decision and is re-injected into the system prompt, making the agent's recent history visible both to the LLM and to any human reviewing the session state.
+</p>
+
+<p>
+Transparency is particularly important for agentic systems because the emergent tool-selection behavior of an LLM can be difficult to predict in advance (Wang et al., 2024). Making the reasoning trace explicit allows operators to identify when the agent's tool-call sequence deviates from expectations — for example, calling <code>escalate_to_human</code> for a query that seemed routine — which may indicate an edge case worth investigating or a system prompt ambiguity worth clarifying.
+</p>
+
+<!-- ── Section 5 ────────────────────────────────────────────────────── -->
+<h2 id="s5">5. Observed Behavior and Limitations</h2>
+
+<h3>5.1 Observed behavior across execution scenarios</h3>
+
+<p>
+<strong>Scenario 1 (normal routing):</strong> The agent correctly chained three tool calls in logical order — vehicle status, inventory check, path computation — and returned a clear recommendation that confirmed the vehicle's availability, the zone's inventory adequacy, and the specific route. No safeguards were triggered. This scenario demonstrates the baseline agentic behavior: the model decomposes a multi-faceted query into a sequence of atomic tool calls and synthesises the results into a coherent answer.
+</p>
+
+<p>
+<strong>Scenario 2 (safety zone triggered):</strong> When asked to route AGV-1 from zone A to zone D — a path whose natural BFS solution traverses MAIN_AISLE — the pre-dispatch safety check correctly injected a warning into the tool result. The model received the warning and autonomously called <code>escalate_to_human</code> with urgency='high', generating an escalation ticket. The agent then communicated clearly to the manager that supervisor approval was required before the route could be authorised. This demonstrates the intended fail-safe behavior and the effectiveness of the two-layer safeguard design.
+</p>
+
+<p>
+<strong>Scenario 3 (conflicting blockers — limitation observed):</strong> A request to dispatch AGV-2 (12% battery, charging) to zone B (zero inventory) exposed a prioritisation gap. The agent correctly identified both issues via tool calls, but the order in which it presented them in the final response was inconsistent across runs — sometimes leading with the battery warning, sometimes with the empty zone. This reveals that the system has no explicit conflict-resolution policy beyond what the LLM infers from the system prompt. For safety-critical systems, the order in which issues are surfaced matters: a battery failure mid-route is a different category of risk from an empty pick zone, and operators benefit from a consistent, prioritised presentation.
+</p>
+
+<h3>5.2 Known limitations</h3>
+
+<ul>
+  <li><strong>Static simulated state:</strong> All warehouse data (inventory, fleet, zone graph) is hardcoded in Python dicts. Real-world deployments would require live WMS API integration, which introduces latency, authentication, and failure handling complexity not addressed here.</li>
+  <li><strong>No cross-session memory:</strong> The decision log and conversation history are in-memory structures that are lost when the notebook kernel is restarted. A production system would persist decisions to a database or log file.</li>
+  <li><strong>No conflict-resolution priority policy:</strong> When multiple simultaneous blockers are present, the agent's presentation order is LLM-dependent and non-deterministic. Explicit priority rules (e.g., safety &gt; availability &gt; inventory) should be encoded in the system prompt or as a post-processing step.</li>
+  <li><strong>LLM non-determinism:</strong> Even with temperature=0 (not set in this implementation), minor variation in LLM outputs means the agent's response to identical queries may differ between runs. This is acceptable for a demonstration system but must be addressed in production through deterministic fallback paths for safety-critical decisions.</li>
+  <li><strong>BFS pathfinding simplicity:</strong> The zone graph is a coarse adjacency model. BFS finds the path with fewest zone transitions but ignores travel time, congestion, or vehicle-type traversal constraints. A production implementation would use a weighted graph with A* or a specialised logistics routing algorithm.</li>
+</ul>
+
+<!-- ── Section 6 ────────────────────────────────────────────────────── -->
+<h2 id="s6">6. Ethical and Responsible Use Considerations</h2>
+
+<div class="callout ethical">
+<strong>Primary ethical concern: accountability gap in partially autonomous decisions</strong>
+</div>
+
+<p>
+The WIA agent is designed as a decision-support system, not a fully autonomous one: it recommends rather than executes, and it escalates rather than overrides when safety constraints are violated. However, the gap between recommendation and action is narrower than it may appear. In a time-pressured warehouse environment, a manager receiving a clear, confident routing recommendation from an AI system may follow it without independently verifying the tool results that underpinned it — particularly if the verbose log is not visible in the operational UI. This creates a subtle accountability gap: if the recommendation is wrong (e.g., due to stale inventory data or a BFS path that was technically valid but operationally inadvisable), the agent generated the decision, but a human implemented it. Responsibility for the outcome becomes ambiguous.
+</p>
+
+<p>
+This pattern — where AI system design implicitly shifts moral responsibility from the system to the human operator — is a recognised ethical concern in autonomous AI deployment (Wang et al., 2024). The WIA system addresses this partially through its verbose reasoning trace and decision log, which make the agent's inference chain auditable. However, these mechanisms are only effective if operators are trained to consult them and organisational culture supports questioning AI recommendations. Technical safeguards alone are insufficient; responsible deployment requires complementary governance: clear documentation of system scope and limitations, operator training on when to override AI recommendations, and a defined escalation path for situations the system cannot resolve.
+</p>
+
+<p>
+A second ethical concern is <strong>bias in safety zone coverage</strong>. The <code>HUMAN_SAFETY_ZONES</code> set is manually configured by the system designer. If this set is incomplete — because certain zones were not documented, or because the warehouse layout changed after deployment — the agent may recommend routes through areas that are de facto human zones, posing a physical safety risk. In a production context, safety zone data should be sourced from authoritative operational documentation and reviewed regularly, not hardcoded by a software developer. The system's current design makes the zone list a single point of failure that is invisible to the LLM unless it appears explicitly in the tool result.
+</p>
+
+<!-- ── Section 7 ────────────────────────────────────────────────────── -->
+<h2 id="s7">7. Future Improvements</h2>
+
+<h3>7.1 Persistent memory and cross-session continuity</h3>
+
+<p>
+Replacing the in-memory decision log with a persistent store (e.g., SQLite or Redis) would allow the agent to recall decisions from previous shifts. This would support pattern analysis — identifying recurring escalations that might indicate a systemic issue — and would give shift-change supervisors a structured handover briefing without manual note-taking.
+</p>
+
+<h3>7.2 Live WMS integration</h3>
+
+<p>
+Replacing the simulated tool implementations with real REST API calls to a Warehouse Management System would make the agent deployable in an actual logistics environment. This would require adding retry logic, timeout handling, authentication token management, and graceful degradation when APIs are unavailable — all of which are standard production engineering concerns absent from the demonstration implementation.
+</p>
+
+<h3>7.3 Explicit conflict-resolution policy</h3>
+
+<p>
+Adding a structured priority policy for competing blockers — encoded either as explicit rules in the system prompt or as a post-processing layer that sorts and formats the agent's findings before returning them — would eliminate the ordering inconsistency observed in Scenario 3 and make the agent's behavior more predictable for operators.
+</p>
+
+<h3>7.4 Formal evaluation harness</h3>
+
+<p>
+A systematic evaluation of agent behavior across a larger scenario battery — including adversarial inputs, edge cases, and degraded-state scenarios — would provide the quantitative reliability evidence needed for a production deployment case. This could build on the Reflexion framework (Shinn et al., 2023), where the agent's past failures are used to refine its system prompt and reasoning strategy iteratively.
+</p>
+
+<h3>7.5 Expanded safeguard coverage</h3>
+
+<p>
+Current safeguards focus on routing safety. Future work should add: rate-limiting for escalation calls (to prevent alert fatigue), audit logging to an external immutable store, input sanitisation to prevent prompt injection attacks against the LLM, and confidence scoring on tool results to flag when data quality is insufficient for a reliable recommendation.
+</p>
+
+<h3>7.6 Multi-agent extension</h3>
+
+<p>
+The single-agent WIA could be extended to a multi-agent architecture where specialised sub-agents (inventory analyst, route planner, vehicle scheduler) handle different aspects of a query in parallel, coordinated by an orchestrator agent. This aligns with the hierarchical multi-agent patterns explored in the broader capstone project on logistics fleet coordination and would be a natural next step toward a production-grade system.
+</p>
+
+<!-- ── References ─────────────────────────────────────────────────── -->
+<div class="references">
+<h2 id="refs">References</h2>
+
+<div class="ref-entry">
+Adhikari, N. K. J. (2022). <em>Reproducible data science with Python: An open learning resource</em>. ResearchGate. https://doi.org/10.13140/RG.2.2.22099.04641
+</div>
+
+<div class="ref-entry">
+Shinn, N., Cassano, F., Labash, A., Gopalan, A., Narasimhan, K., &amp; Yao, S. (2023). Reflexion: Language agents with verbal reinforcement learning. <em>Advances in Neural Information Processing Systems, 36</em>, 8634–8652.
+</div>
+
+<div class="ref-entry">
+Wang, L., Ma, C., Feng, X., Zhang, Z., Yang, H., Zhang, J., Chen, Z., Tang, J., Chen, X., Lin, Y., Zhao, W. X., Wei, Z., &amp; Wen, J. R. (2024). A survey on large language model based autonomous agents. <em>Frontiers of Computer Science, 18</em>(6), 186345. https://doi.org/10.1007/s11704-024-40231-1
+</div>
+
+<div class="ref-entry">
+Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., &amp; Cao, Y. (2023). ReAct: Synergizing reasoning and acting in language models. <em>International Conference on Learning Representations (ICLR 2023)</em>.
+</div>
+
+</div>
+
+</body>
+</html>
