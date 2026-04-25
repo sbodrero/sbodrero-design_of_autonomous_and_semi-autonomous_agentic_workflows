@@ -74,4 +74,29 @@ WarehouseAgent (ReAct loop)
 
 - Python 3.9+
 - `ANTHROPIC_API_KEY` environment variable set
-- See `requirements.txt` for full dependency list
+
+### Runtime dependency
+
+The agent code has a single external dependency:
+
+```
+anthropic==0.90.0
+```
+
+To install in a clean environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install anthropic==0.90.0
+```
+
+Or use the minimal pinned file:
+
+```bash
+pip install -r requirements-core.txt
+```
+
+### Full environment
+
+`requirements.txt` is a complete `pip freeze` of the Jupyter development environment (≈110 packages including `jupyterlab`, `numpy`, `pandas`, `matplotlib`, etc.). It is provided for full reproducibility of the notebook execution environment. The agent itself only requires `anthropic`; all other imports (`os`, `json`, `datetime`, `collections`, `typing`) are Python standard library.
